@@ -28,14 +28,14 @@ class SpotifyRepository {
     }
 
     persistOrUpdateAccount(tokenResponse: SpotifyAccessTokenRespnse, spotifyUserRespose: SpotifyUserResponse): Promise<boolean> {
-        const account: Account = new Account(
-            "TODO GENERATE USER ID",
-            spotifyUserRespose.id,
-            tokenResponse.access_token,
-            tokenResponse.refresh_token,
-            spotifyUserRespose.email,
-            spotifyUserRespose.display_name,
-        )
+        const account: Account = new Account({
+            user_id: "TODO GENERATE USER ID",
+            spotify_id: spotifyUserRespose.id,
+            access_token: tokenResponse.access_token,
+            refresh_token: tokenResponse.refresh_token,
+            email: spotifyUserRespose.email,
+            display_name: spotifyUserRespose.display_name,
+        })
 
         return AppDataSource.manager.save(account)
             .then(() => true)
