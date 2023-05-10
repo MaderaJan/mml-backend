@@ -1,12 +1,18 @@
 import SpotifyRepository from '@infrastructure/spotify/spotify-repostiory'
 import queryString from 'node:querystring'
+import AuthentificationUseCase from '../auth/authentification-use-case'
 
 class SpotifyLoginUseCase {
 
-    spotifyRepository: SpotifyRepository;
+    spotifyRepository: SpotifyRepository
+    authentificaitonUseCase: AuthentificationUseCase
 
-    constructor(spotifyRepository: SpotifyRepository) {
+    constructor(
+        spotifyRepository: SpotifyRepository,
+        authentificaitonUseCase: AuthentificationUseCase
+    ) {
         this.spotifyRepository = spotifyRepository
+        this.authentificaitonUseCase = authentificaitonUseCase
     }
 
     readonly REDIRECT_URI = 'http://localhost:8000/callback'
@@ -14,7 +20,7 @@ class SpotifyLoginUseCase {
     readonly CLIENT_SECRET = '56cbee449ddd42efa4a05a21c51bb8bc'
     readonly SCOPE = 'user-read-private user-read-email'
 
-    getSpotifyLoginUrl(): string {
+    getLoginUrl(): string {
         return 'https://accounts.spotify.com/authorize?' + queryString.stringify({
             response_type: 'code',
             client_id: this.CLIENT_ID,
@@ -23,7 +29,7 @@ class SpotifyLoginUseCase {
         })
     }
 
-    loginSpotifyUser(code: string): Promise<boolean> {
+    loginUser(code: string): Promise<string> {
         const token = Buffer.from(this.CLIENT_ID + ':' + this.CLIENT_SECRET).toString('base64')
 
         const requestData: SpotifyAccessTokenRequest = {
@@ -35,8 +41,10 @@ class SpotifyLoginUseCase {
         return this.spotifyRepository.getAccessRefreshToken(requestData, token)
             .then(tokenResponse => {
                 return this.spotifyRepository.getUser(tokenResponse.access_token)
-                    .then(spotifyUserRespose =>{
+                    .then(spotifyUserRespose => {
                         return this.spotifyRepository.persistOrUpdateAccount(tokenResponse, spotifyUserRespose)
+                    }).then(userId => {
+                        return this.authentificaitonUseCase.generateAuthToken(userId, tokenResponse.access_token)
                     })
             })
     }

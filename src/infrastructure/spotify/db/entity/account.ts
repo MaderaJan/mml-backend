@@ -5,9 +5,6 @@ import { Column, Entity, PrimaryColumn } from "typeorm"
 export class Account {
 
     @PrimaryColumn()
-    user_id: string
-
-    @PrimaryColumn()
     spotify_id: string
 
     @Column()
@@ -22,22 +19,13 @@ export class Account {
     @Column()
     display_name: string
 
-    constructor({
-        user_id,
-        spotify_id,
-        access_token,
-        refresh_token,
-        email,
-        display_name,
-    }: {
-        user_id: string,
+    constructor(
         spotify_id: string,
         access_token: string,
         refresh_token: string,
         email: string,
         display_name: string,
-    }) {
-        this.user_id = user_id
+    ) {
         this.spotify_id = spotify_id
         this.access_token = access_token
         this.refresh_token = refresh_token
